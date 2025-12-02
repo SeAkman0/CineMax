@@ -23,6 +23,15 @@ $session = $stmt->fetch();
 
 if (!$session) { die("Seans bulunamadı."); }
 
+//zaman kontrolü
+if (strtotime($session['start_time']) < time()) {
+    echo "<script>
+        alert('Bu seansın saati geçmiştir. Bilet alamazsınız.');
+        window.location.href = 'film-detay.php?id=" . $session['film_id'] . "';
+    </script>";
+    exit;
+}
+
 // Satılmış Biletleri Çek
 $stmtTickets = $pdo->prepare("SELECT seat_number FROM tickets WHERE session_id = ?");
 $stmtTickets->execute([$session_id]);

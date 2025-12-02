@@ -122,6 +122,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <i class="fas fa-chair fa-fw"></i> Salon Yönetimi
             </a>
 
+            <a href="biletler.php" class="<?php echo ($current_page == 'biletler.php') ? 'active' : ''; ?>">
+                <i class="fas fa-ticket fa-fw"></i> Biletler
+            </a>
+
             <a href="users.php" class="<?php echo ($current_page == 'users.php') ? 'active' : ''; ?>">
                 <i class="fas fa-users fa-fw"></i> Kullanıcılar
             </a>

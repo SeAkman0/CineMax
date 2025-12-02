@@ -23,20 +23,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['selected_seats'])) {
         // Veritabanı işlemini başlat (Transaction)
         $pdo->beginTransaction(); 
 
-        $sql = "INSERT INTO tickets (user_id, session_id, seat_number) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO tickets (user_id, session_id, seat_number, verification_code) VALUES (?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
 
         foreach ($seats as $seat) {
             // Önce bu koltuk satılmış mı diye son bir kontrol yapalım (Çakışma önlemek için)
             $check = $pdo->prepare("SELECT id FROM tickets WHERE session_id = ? AND seat_number = ?");
             $check->execute([$session_id, $seat]);
+            $unique_code = "CNM-" . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
             
             if ($check->rowCount() > 0) {
                 throw new Exception("Seçtiğiniz $seat numaralı koltuk az önce başkası tarafından alındı.");
             }
 
             // Satılmamışsa ekle
-            $stmt->execute([$user_id, $session_id, $seat]);
+            $stmt->execute([$user_id, $session_id, $seat, $unique_code]);
         }
 
         $pdo->commit(); // İşlemi onayla

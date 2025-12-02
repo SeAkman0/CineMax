@@ -12,15 +12,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$name, $rows, $cols]);
         
-        // Sayfayı yenile (Form tekrar gönderilmesin diye)
         echo "<script>window.location.href='halls.php';</script>";
         exit;
     }
 }
 
-// --- MEVCUT SALONLARI LİSTELE ---
-$stmt = $pdo->query("SELECT * FROM halls ORDER BY id ASC");
+// --- SIRALAMA MANTIĞI ---
+
+// İzin verilen sütunlar (Güvenlik için)
+$sortable_columns = [
+    'id' => 'id',
+    'name' => 'name',
+    'rows' => 'total_rows',
+    'capacity' => '(total_rows * total_cols)' // Kapasiteyi hesaplayarak sırala
+];
+
+// URL'den gelen veriyi al
+$sort = isset($_GET['sort']) && array_key_exists($_GET['sort'], $sortable_columns) ? $_GET['sort'] : 'id';
+$dir = isset($_GET['dir']) && strtoupper($_GET['dir']) == 'ASC' ? 'ASC' : 'DESC';
+
+// Sorguyu Hazırla
+$sql = "SELECT *, (total_rows * total_cols) as capacity FROM halls ORDER BY " . $sortable_columns[$sort] . " " . $dir;
+$stmt = $pdo->query($sql);
 $halls = $stmt->fetchAll();
+
+// --- YARDIMCI FONKSİYON: BAŞLIK LİNKİ ---
+function createSortLink($column, $label, $currentSort, $currentDir) {
+    $newDir = ($currentSort == $column && $currentDir == 'ASC') ? 'DESC' : 'ASC';
+    
+    $icon = '<i class="fas fa-sort" style="color:#ccc; opacity:0.3; font-size:0.8rem;"></i>';
+    if ($currentSort == $column) {
+        $icon = ($currentDir == 'ASC') 
+            ? '<i class="fas fa-sort-up" style="color:#333;"></i>' 
+            : '<i class="fas fa-sort-down" style="color:#333;"></i>';
+    }
+
+    return '<a href="?sort='.$column.'&dir='.$newDir.'" style="text-decoration:none; color:#555; display:flex; align-items:center; gap:5px;">
+                '.$label.' '.$icon.'
+            </a>';
+}
 ?>
 
 <h1>Salon Yönetimi</h1>
@@ -71,10 +101,10 @@ $halls = $stmt->fetchAll();
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
                     <tr style="background:#f8f9fa; border-bottom:2px solid #eee;">
-                        <th style="padding:12px; text-align:left;">ID</th>
-                        <th style="padding:12px; text-align:left;">Salon Adı</th>
-                        <th style="padding:12px; text-align:left;">Boyutlar</th>
-                        <th style="padding:12px; text-align:left;">Kapasite</th>
+                        <th style="padding:12px;"><?php echo createSortLink('id', 'ID', $sort, $dir); ?></th>
+                        <th style="padding:12px;"><?php echo createSortLink('name', 'Salon Adı', $sort, $dir); ?></th>
+                        <th style="padding:12px;"><?php echo createSortLink('rows', 'Boyutlar', $sort, $dir); ?></th>
+                        <th style="padding:12px;"><?php echo createSortLink('capacity', 'Kapasite', $sort, $dir); ?></th>
                         <th style="padding:12px; text-align:left;">İşlem</th>
                     </tr>
                 </thead>
@@ -88,7 +118,7 @@ $halls = $stmt->fetchAll();
                         </td>
                         <td style="padding:12px;">
                             <span style="background:#eafaf1; color:#2ecc71; padding:3px 8px; border-radius:10px; font-weight:bold; font-size:0.85rem;">
-                                <?php echo $hall['total_rows'] * $hall['total_cols']; ?> Kişi
+                                <?php echo $hall['capacity']; ?> Kişi
                             </span>
                         </td>
                         <td style="padding:12px;">

@@ -30,7 +30,7 @@ $sqlTopFilms = "SELECT f.title, COUNT(t.id) as ticket_count, SUM(s.price) as tot
 $topFilms = $pdo->query($sqlTopFilms)->fetchAll();
 
 // 3. Son Satılan Biletler (Son 10)
-$sqlRecentSales = "SELECT t.*, u.username, f.title, s.start_time, s.price
+$sqlRecentSales = "SELECT t.*, u.username, f.title, s.start_time, s.price, t.verification_code
                    FROM tickets t
                    JOIN users u ON t.user_id = u.id
                    JOIN sessions s ON t.session_id = s.id
@@ -130,25 +130,30 @@ $recentSales = $pdo->query($sqlRecentSales)->fetchAll();
         <h3>🏆 En Çok İzlenen Filmler</h3>
         <table>
             <thead>
-                <tr>
-                    <th>Film Adı</th>
-                    <th>Bilet Adedi</th>
-                    <th>Kazanç</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach($topFilms as $film): ?>
-                <tr>
-                    <td><?php echo $film['title']; ?></td>
-                    <td><strong><?php echo $film['ticket_count']; ?></strong></td>
-                    <td class="text-green"><?php echo number_format($film['total_earnings'], 2); ?> ₺</td>
-                </tr>
-                <?php endforeach; ?>
-                
-                <?php if(count($topFilms) == 0): ?>
-                    <tr><td colspan="3" style="text-align:center;">Henüz satış yok.</td></tr>
-                <?php endif; ?>
-            </tbody>
+    <tr>
+        <th>Kullanıcı</th>
+        <th>Film</th>
+        <th>Koltuk</th> <th>Kod / QR</th> <th>Tutar</th>
+    </tr>
+</thead>
+<tbody>
+    <?php foreach($recentSales as $sale): ?>
+    <tr>
+        <td><?php echo $sale['username']; ?></td>
+        <td><?php echo $sale['title']; ?></td>
+        <td><strong><?php echo $sale['seat_number']; ?></strong></td>
+        <td>
+            <div style="display:flex; align-items:center; gap:5px;">
+                <code style="background:#eee; padding:2px 5px; border-radius:3px; font-size:0.8rem;"><?php echo $sale['verification_code']; ?></code>
+                <a href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo $sale['verification_code']; ?>" target="_blank" title="QR Kodu Gör">
+                    <i class="fas fa-qrcode" style="color:#333;"></i>
+                </a>
+            </div>
+        </td>
+        <td><span class="bg-green">+<?php echo $sale['price']; ?> ₺</span></td>
+    </tr>
+    <?php endforeach; ?>
+</tbody>
         </table>
     </div>
 

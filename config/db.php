@@ -3,6 +3,8 @@ $host = 'localhost';
 $dbname = 'cinemax_db';
 $username = 'root'; // XAMPP/MAMP varsayılanı genelde root'tur
 $password = '';     // XAMPP'te boş, MAMP'te 'root' olabilir
+date_default_timezone_set('Europe/Istanbul');
+setlocale(LC_TIME, 'tr_TR.UTF-8', 'tr_TR', 'tr', 'turkish');
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
@@ -12,6 +14,7 @@ try {
     // Session başlatma işlemini de burada yapabiliriz, her sayfada tekrar yazmamak için
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
+        ob_start();
     }
     
 } catch (PDOException $e) {
