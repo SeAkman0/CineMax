@@ -3,12 +3,14 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Kütüphaneleri Dahil Et
 require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
+require_once('tcpdf/tcpdf.php'); // TCPDF Kütüphanesi
 
-include 'config/database.php'; // Yeni dosya adı
-include 'includes/header.php';// Yeni dosya adı
+include 'config/database.php'; 
+include 'includes/header.php'; 
 
 // Güvenlik
 if (!isset($_SESSION['user_id'])) {
@@ -26,6 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['selected_seats'])) {
     $stmtUser = $pdo->prepare("SELECT email, username FROM users WHERE id = ?");
     $stmtUser->execute([$user_id]);
     $user_info = $stmtUser->fetch();
+    
+    // --- DÜZELTME BURADA YAPILDI ---
+    // Değişkenleri tanımlıyoruz ki aşağıda hata vermesin
+    $user_name = $user_info['username'];
+    $user_email = $user_info['email'];
+    // -------------------------------
 
     // Film ve Salon Bilgileri
     $stmtSession = $pdo->prepare("SELECT s.start_time, f.title, f.poster_url, h.name as hall_name 
@@ -39,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['selected_seats'])) {
     $success = true;
     $error = "";
     
-    // Mail İçeriği İçin Veri Toplama
     $ticket_details = [];
 
     try {
@@ -62,93 +69,109 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['selected_seats'])) {
         $pdo->commit(); 
 
         // ==========================================
-        //  E-POSTA GÖNDERME İŞLEMİ (TASARIMLI)
+        //  1. PDF OLUŞTURMA İŞLEMİ
+        // ==========================================
+        
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $pdf->SetCreator('CinemaMax');
+        $pdf->SetTitle('Sinema Biletiniz');
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->AddPage();
+
+        $filmAdi = $session_info['title'];
+        $tarih = date("d.m.Y", strtotime($session_info['start_time']));
+        $saat = date("H:i", strtotime($session_info['start_time']));
+        $salon = $session_info['hall_name'];
+        
+        $html = '
+        <style>
+            .ticket-box { border: 2px dashed #333; padding: 20px; margin-bottom: 20px; color:#333; }
+            .header { font-size: 24px; font-weight: bold; color: #1e90ff; border-bottom: 2px solid #1e90ff; }
+            .info { font-size: 14px; color: #555; }
+            .label { font-weight: bold; color: #000; }
+            .seat-badge { font-size: 20px; font-weight: bold; color: #e74c3c; }
+        </style>';
+
+        foreach ($ticket_details as $item) {
+            $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . $item['code'];
+
+            $html .= '
+            <table cellpadding="10" cellspacing="0" border="0" style="border: 2px dashed #ccc;">
+                <tr>
+                    <td width="60%">
+                        <div style="font-size: 22px; font-weight: bold; color:#1e90ff;">CinemaMax</div>
+                        <br><br>
+                        <div style="font-size: 18px; font-weight: bold;">'.$filmAdi.'</div>
+                        <div style="color:#555;">
+                            <br><b>Tarih:</b> '.$tarih.'
+                            <br><b>Saat:</b> '.$saat.'
+                            <br><b>Salon:</b> '.$salon.'
+                        </div>
+                        <br><br>
+                        <div style="font-size: 16px;"><b>Koltuk:</b> <span style="font-size:24px; color:#e74c3c;">'.$item['seat'].'</span></div>
+                        <div style="font-size: 10px; color:#999;">Bilet Kodu: '.$item['code'].'</div>
+                    </td>
+                    <td width="40%" align="center">
+                        <br><br>
+                        <img src="'.$qrUrl.'" width="120" height="120">
+                        <br><span style="font-size:10px; color:#999;">Girişte Okutunuz</span>
+                    </td>
+                </tr>
+            </table>
+            <br><br>';
+        }
+
+        $pdf->writeHTML($html, true, false, true, false, '');
+        $pdfContent = $pdf->Output('bilet.pdf', 'S'); 
+
+
+        // ==========================================
+        //  2. MAİL GÖNDERME (EKLİ)
         // ==========================================
         
         $mail = new PHPMailer(true);
 
         try {
-            // 1. Sunucu Ayarları
+            // Ayarlar
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'cmax131415@gmail.com'; 
-            $mail->Password   = 'klhs biqc hjtl kuup'; 
-    
-            $mail->SMTPSecure = 'tls'; // veya 'ssl'
-            $mail->Port       = 587;   // ssl için 465
+            $mail->Username   = 'cmax131415@gmail.com'; // <-- GÜNCELLE
+            $mail->Password   = 'mawm khmr ehez zxhr';     // <-- GÜNCELLE
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
+            $mail->SMTPOptions = array(
+                'ssl' => array(
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true
+                )
+            );
 
-            // 2. Alıcı Ayarları
+            // Alıcı
             $mail->setFrom('noreply@cinemamax.com', 'CinemaMax Bilet');
-            $mail->addAddress($user_info['email'], $user_info['username']);
+            $mail->addAddress($user_email, $user_name); // ARTIK HATA VERMEZ
 
-            // 3. İçerik Ayarları
+            // PDF Dosyasını Ekle
+            $mail->addStringAttachment($pdfContent, 'SinemaBiletiniz.pdf');
+
+            // İçerik
             $mail->isHTML(true);
             $mail->CharSet = 'UTF-8';
             $mail->Subject = 'Biletiniz Hazır! 🎬 ' . $session_info['title'];
+            $mail->Body    = "
+                <h2>İyi Seyirler $user_name!</h2>
+                <p>Bilet satın alma işleminiz başarıyla gerçekleşti.</p>
+                <p><strong>Biletiniz ekteki PDF dosyasındadır.</strong> Girişte bu dosyadaki QR kodu okutarak geçiş yapabilirsiniz.</p>
+                <br>
+                <p>SinemaMax Ekibi</p>
+            ";
 
-            // --- HTML MAİL TASARIMI (Bilet Görünümlü) ---
-            $tarih = date("d.m.Y", strtotime($session_info['start_time']));
-            $saat = date("H:i", strtotime($session_info['start_time']));
-            $poster = $session_info['poster_url']; // Tam URL olmalı (http://...) yoksa mailde görünmez. 
-            // Localhost olduğu için poster mailde kırık görünebilir, canlıda düzelir.
-
-            $messageBody = "
-            <div style='background-color:#f4f4f4; padding:20px; font-family:Arial, sans-serif;'>
-                <div style='max-width:600px; margin:0 auto; background:white; border-radius:10px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1);'>
-                    
-                    <div style='background:#1e90ff; color:white; padding:20px; text-align:center;'>
-                        <h1 style='margin:0; font-size:24px;'>CinemaMax</h1>
-                        <p style='margin:5px 0 0 0;'>İyi Seyirler Dileriz!</p>
-                    </div>
-
-                    <div style='padding:20px; border-bottom:1px dashed #ddd; display:flex; align-items:center;'>
-                        <div style='flex:1;'>
-                            <h2 style='margin:0 0 10px 0; color:#333;'>{$session_info['title']}</h2>
-                            <p style='margin:5px 0; color:#666;'>📅 <strong>Tarih:</strong> $tarih</p>
-                            <p style='margin:5px 0; color:#666;'>⏰ <strong>Saat:</strong> $saat</p>
-                            <p style='margin:5px 0; color:#666;'>📍 <strong>Salon:</strong> {$session_info['hall_name']}</p>
-                        </div>
-                    </div>
-
-                    <div style='padding:20px;'>
-                        <h3 style='margin-top:0; color:#555; text-align:center;'>Biletleriniz</h3>
-                        <table style='width:100%; border-collapse:collapse;'>";
-
-            foreach ($ticket_details as $item) {
-                // QR API Linki
-                $qrLink = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . $item['code'];
-                
-                $messageBody .= "
-                <tr>
-                    <td style='border:1px solid #eee; padding:15px; background:#f9f9f9; border-radius:5px;'>
-                        <div style='font-size:18px; font-weight:bold; color:#1e90ff;'>Koltuk: {$item['seat']}</div>
-                        <div style='font-size:12px; color:#999; margin-top:5px;'>Kod: {$item['code']}</div>
-                    </td>
-                    <td style='border:1px solid #eee; padding:10px; text-align:center; background:white; width:100px;'>
-                        <img src='$qrLink' alt='QR' width='80'>
-                    </td>
-                </tr>
-                <tr><td colspan='2' style='height:10px;'></td></tr>"; // Boşluk
-            }
-
-            $messageBody .= "
-                        </table>
-                    </div>
-
-                    <div style='background:#333; color:#999; padding:15px; text-align:center; font-size:12px;'>
-                        <p>Lütfen sinema girişinde QR kodlarınızı görevliye okutunuz.</p>
-                        <p>&copy; 2025 CinemaMax</p>
-                    </div>
-                </div>
-            </div>";
-
-            $mail->Body = $messageBody;
             $mail->send();
 
         } catch (Exception $e) {
-            // Mail hatası olursa kullanıcıya hissettirme, logla geç
-            // error_log("Mail Gönderilemedi: " . $mail->ErrorInfo);
+            // Mail hatası sessizce geçilir
         }
 
     } catch (Exception $e) {
@@ -171,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['selected_seats'])) {
             
             <h1 style="color: #333; margin-bottom: 15px;">Ödeme Başarılı!</h1>
             <p style="color: #666; font-size: 1.1rem; margin-bottom: 30px;">
-                Biletleriniz oluşturuldu ve <strong><?php echo $user_info['email']; ?></strong> adresine gönderildi.
+                Biletiniz oluşturuldu ve <strong><?php echo $user_email; ?></strong> adresine, <strong>PDF formatında</strong> gönderildi.
             </p>
             
             <div style="display: flex; justify-content: center; gap: 15px;">

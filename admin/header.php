@@ -106,7 +106,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <p>Yönetim Paneli</p>
             <hr>
             
-            <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
+            <a href="dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
                 <i class="fas fa-tachometer-alt fa-fw"></i> Özet / İstatistik
             </a>
             
@@ -114,7 +114,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <i class="fas fa-video fa-fw"></i> Film Yönetimi
             </a>
             
-            <a href="sessions.php" class="<?php echo ($current_page == 'sessions.php') ? 'active' : ''; ?>">
+            <a href="showtimes.php" class="<?php echo ($current_page == 'showtimes.php') ? 'active' : ''; ?>">
                 <i class="fas fa-clock fa-fw"></i> Seans Yönetimi
             </a>
             
@@ -128,6 +128,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
             <a href="users.php" class="<?php echo ($current_page == 'users.php') ? 'active' : ''; ?>">
                 <i class="fas fa-users fa-fw"></i> Kullanıcılar
+            </a>
+            <a href="scan-ticket.php" class="<?php echo ($current_page == 'scan-ticket.php') ? 'active' : ''; ?>">
+                <i class="fas fa-qrcode fa-fw"></i> QR Okut / Turnike
             </a>
 
             <a href="logs.php" class="<?php echo ($current_page == 'logs.php') ? 'active' : ''; ?>">
@@ -146,3 +149,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
         
         <div class="content">
+            
+      
+     
+

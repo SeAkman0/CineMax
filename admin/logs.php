@@ -1,5 +1,5 @@
 <?php 
-include 'includes/header.php';
+include 'header.php';
 
 // --- SIRALAMA AYARLARI ---
 
