@@ -1,5 +1,5 @@
 <?php 
-include 'header.php'; 
+include 'header.php';
 
 // --- 1. SIRALAMA MANTIĞI ---
 
@@ -101,7 +101,7 @@ function sortIcon($column, $current_sort, $current_dir) {
                 
                 <td style="padding:12px;">
                     <?php if($user['id'] != $_SESSION['user_id']): ?>
-                        <a href="user-sil.php?id=<?php echo $user['id']; ?>" 
+                        <a href="delete-user.php?id=<?php echo $user['id']; ?>" 
                            onclick="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?');"
                            style="color:#ff4757; text-decoration:none;">
                            <i class="fas fa-trash"></i>

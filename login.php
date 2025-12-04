@@ -1,5 +1,5 @@
 <?php
-include 'config/db.php';
+include 'config/database.php';
 
 $message = "";
 
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Role göre yönlendirme
             if ($user['role'] == 'admin') {
-                header("Location: admin/index.php");
+                header("Location: admin/dashboard.php");
             } else {
                 header("Location: index.php");
             }

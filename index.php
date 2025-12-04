@@ -1,12 +1,12 @@
 <?php 
-include 'config/db.php'; 
-include 'header.php'; // Tasarladığın Header
+include 'config/database.php'; 
+include 'includes/header.php';
 
 // 1. En son eklenen filmi "Hero" (Manşet) için çek
 $stmtHero = $pdo->query("SELECT * FROM films WHERE is_active = 1 ORDER BY id DESC LIMIT 1");
 $heroFilm = $stmtHero->fetch();
 
-// 2. Tüm filmleri çek (Hero film dahil hepsi listede de olsun)
+// 2. Tüm filmleri çek
 $stmtAll = $pdo->query("SELECT * FROM films WHERE is_active = 1 ORDER BY id DESC");
 $films = $stmtAll->fetchAll();
 ?>
@@ -19,10 +19,11 @@ $films = $stmtAll->fetchAll();
                 <h1 class="hero-title"><?php echo $heroFilm['title']; ?></h1>
                 <p class="hero-subtitle"><?php echo mb_substr($heroFilm['description'], 0, 150) . '...'; ?></p>
                 <div class="hero-buttons">
-                    <a href="film-detay.php?id=<?php echo $heroFilm['id']; ?>" class="btn btn-primary">
+                    <a href="booking.php?id=<?php echo $heroFilm['id']; ?>#seanslar" class="btn btn-primary">
                         <i class="fas fa-ticket-alt"></i> Bilet Al
                     </a>
-                    <a href="film-detay.php?id=<?php echo $heroFilm['id']; ?>" class="btn btn-secondary">
+                    
+                    <a href="movie-details.php?id=<?php echo $heroFilm['id']; ?>" class="btn btn-secondary">
                         <i class="fas fa-info-circle"></i> Detaylar
                     </a>
                 </div>
@@ -37,7 +38,16 @@ $films = $stmtAll->fetchAll();
     <?php endif; ?>
 
     <div class="container" id="filmler">
-        <h2 class="section-title">Vizyondaki Filmler</h2>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin: 40px 0 20px 0; flex-wrap:wrap; gap:20px;">
+            <h2 class="section-title" style="margin:0;">Vizyondaki Filmler</h2>
+            
+            <div style="position:relative;">
+                <input type="text" id="movieSearchInput" placeholder="Film ara..." 
+                       style="padding: 10px 15px 10px 40px; border-radius: 25px; border: 1px solid #ddd; width: 250px; outline:none; transition:0.3s;">
+                <i class="fas fa-search" style="position:absolute; left:15px; top:50%; transform:translateY(-50%); color:#aaa;"></i>
+            </div>
+        </div>
         
         <div class="movies-grid">
             <?php foreach($films as $film): ?>
@@ -50,8 +60,14 @@ $films = $stmtAll->fetchAll();
                         <span class="rating"><i class="fas fa-star"></i> 8.5</span>
                     </div>
                 </div>
-                <div class="movie-footer">
-                    <a href="film-detay.php?id=<?php echo $film['id']; ?>" class="btn btn-primary" style="width:100%;">Bilet Al</a>
+                
+                <div class="movie-footer" style="display:flex; gap:10px;">
+                    <a href="booking.php?id=<?php echo $film['id']; ?>#seanslar" class="btn btn-primary" style="flex:1; font-size:0.9rem;">
+                        Bilet Al
+                    </a>
+                    <a href="movie-details.php?id=<?php echo $film['id']; ?>" class="btn btn-secondary" style="flex:1; font-size:0.9rem; background:#fff; color:#1e90ff; border:1px solid #1e90ff;">
+                        Detay
+                    </a>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -81,4 +97,4 @@ $films = $stmtAll->fetchAll();
         </div>
     </section>
 
-<?php include 'footer.php'; ?>
+<?php include 'includes/footer.php'; ?>

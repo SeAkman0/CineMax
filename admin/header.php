@@ -3,7 +3,7 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-include '../config/db.php';
+include '../config/database.php';
 
 // Güvenlik Kontrolü: Admin değilse at!
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
@@ -110,7 +110,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <i class="fas fa-tachometer-alt fa-fw"></i> Özet / İstatistik
             </a>
             
-            <a href="films.php" class="<?php echo ($current_page == 'films.php') ? 'active' : ''; ?>">
+            <a href="movies.php" class="<?php echo ($current_page == 'movies.php') ? 'active' : ''; ?>">
                 <i class="fas fa-video fa-fw"></i> Film Yönetimi
             </a>
             
@@ -122,7 +122,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <i class="fas fa-chair fa-fw"></i> Salon Yönetimi
             </a>
 
-            <a href="biletler.php" class="<?php echo ($current_page == 'biletler.php') ? 'active' : ''; ?>">
+            <a href="tickets.php" class="<?php echo ($current_page == 'tickets.php') ? 'active' : ''; ?>">
                 <i class="fas fa-ticket fa-fw"></i> Biletler
             </a>
 

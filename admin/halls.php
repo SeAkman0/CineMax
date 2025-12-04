@@ -1,5 +1,5 @@
 <?php 
-include 'header.php'; 
+include 'header.php';
 
 // --- SALON EKLEME İŞLEMİ ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -122,7 +122,7 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
                             </span>
                         </td>
                         <td style="padding:12px;">
-                            <a href="salon-sil.php?id=<?php echo $hall['id']; ?>" 
+                            <a href="delete-hall.php?id=<?php echo $hall['id']; ?>" 
                                onclick="return confirm('DİKKAT! Bu salonu silerseniz, bu salondaki TÜM SEANSLAR ve BİLETLER de silinir. Onaylıyor musunuz?');"
                                style="color:#ff4757; text-decoration:none;">
                                <i class="fas fa-trash"></i> Sil
