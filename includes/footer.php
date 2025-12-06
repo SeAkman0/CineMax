@@ -1,6 +1,7 @@
 <footer class="footer">
         <div class="container">
             <div class="footer-content">
+                
                 <div class="footer-section">
                     <h3>CinemaMax</h3>
                     <p>En iyi sinema deneyimi için buradayız. Vizyondaki en yeni filmleri hemen keşfedin.</p>
@@ -10,64 +11,76 @@
                         <a href="#"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
+
                 <div class="footer-section">
                     <h4>Hızlı Linkler</h4>
                     <p><a href="index.php">Ana Sayfa</a></p>
                     <p><a href="login.php">Giriş Yap</a></p>
                     <p><a href="register.php">Kayıt Ol</a></p>
                 </div>
+
                 <div class="footer-section">
                     <h4>İletişim</h4>
                     <p><i class="fas fa-envelope"></i> info@cinemamax.com</p>
                     <p><i class="fas fa-map-marker-alt"></i> İstanbul, Türkiye</p>
                 </div>
+
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2025 CinemaMax. Tüm hakları saklıdır.</p>
             </div>
         </div>
     </footer>
-</body>
-</html>
 
-<script>
+    <script src="assets/js/script.js"></script>
+
+    <script>
         document.addEventListener("DOMContentLoaded", function() {
             
-            window.addEventListener('scroll', function() {
-                
-                // 1. Gerekli Elemanları Seç
-                const section = document.getElementById('filmler');
+            // --- 1. MOBİL FOOTER ACCORDION (YENİ) ---
+            // Sadece mobil boyutta çalışsın diye kontrol edebiliriz ama CSS zaten hallediyor.
+            const footerHeaders = document.querySelectorAll('.footer-section h3, .footer-section h4');
 
-                // DÜZELTME BURADA: Sadece '.nav-menu' sınıfının içindeki linkleri seçiyoruz.
-                // Böylece logoyu değil, menü düğmelerini hedefliyoruz.
+            footerHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    // Sadece mobilde (768px altı) çalışsın
+                    if (window.innerWidth <= 768) {
+                        const parent = header.parentElement;
+                        
+                        // Diğerlerini kapat (İsteğe bağlı, hepsi açık kalsın istersen bu bloğu sil)
+                        document.querySelectorAll('.footer-section').forEach(item => {
+                            if (item !== parent) item.classList.remove('active');
+                        });
+
+                        // Tıklananı aç/kapat
+                        parent.classList.toggle('active');
+                    }
+                });
+            });
+
+
+            // --- 2. SCROLL SPY (Senin Kodun) ---
+            window.addEventListener('scroll', function() {
+                const section = document.getElementById('filmler');
                 const navLink = document.querySelector('.nav-menu a[href*="#filmler"]'); 
                 const homeLink = document.querySelector('.nav-menu a[href="index.php"]');
 
-                // 2. Güvenlik
-                if (!section || !navLink || !homeLink) {
-                    return;
-                }
+                if (!section || !navLink || !homeLink) return;
 
-                // 3. Konum Hesaplamaları
                 let sectionTop = section.offsetTop - 150; 
                 let sectionHeight = section.offsetHeight;
                 let scrollPosition = window.scrollY;
 
-                // 4. Mantık
                 if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                    // Filmler'i yak, Ana Sayfa'yı söndür
                     navLink.classList.add('active');
                     homeLink.classList.remove('active');
                 } 
                 else if (scrollPosition < sectionTop) {
-                    // Filmler'i söndür, Ana Sayfa'yı yak
                     navLink.classList.remove('active');
                     homeLink.classList.add('active');
                 }
             });
         });
     </script>
-
-    <script src="assets/js/script.js"></script>
 </body>
 </html>

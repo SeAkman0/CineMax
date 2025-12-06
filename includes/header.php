@@ -1,10 +1,8 @@
-
-<link href="assets/css/style.css" rel="stylesheet">
 <?php
-// Oturum ve Sayfa Kontrolü
+// Session başlatma kontrolü
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
-// Şu an hangi sayfadayız? (Örn: index.php, my-tickets.php)
+// Aktif sayfayı bul (Link parlatmak için)
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
@@ -14,7 +12,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CinemaMax - Sinema Bilet Sistemi</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="assets/css/style.css?v=<?php echo time(); ?>" rel="stylesheet">
 </head>
 <body>
 
@@ -54,19 +52,24 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 
                 <div class="nav-actions">
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <span style="color:white; font-weight:500; margin-right:10px;">
-                            <?php echo htmlspecialchars($_SESSION['username']); ?>
-                        </span>
-                        <a href="logout.php" class="btn-icon" title="Çıkış Yap">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
+                        
+                        <div style="display:flex; align-items:center; color:white; font-size:0.95rem; margin-right:10px;">
+                            <span style="margin-right:15px;">
+                                👋 Hoşgeldin, <strong style="color:#ffd700; border-bottom:1px dashed #ffd700;"><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
+                            </span>
+                            
+                            <a href="logout.php" class="btn-icon" title="Güvenli Çıkış">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        </div>
+
                     <?php else: ?>
+                        
                         <a href="login.php" class="nav-link <?php echo ($current_page == 'login.php') ? 'active' : ''; ?>"><i class="fas fa-user"></i> Giriş Yap</a>
-                        <a href="register.php" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Kayıt Ol</a>
+                        <a href="register.php" class="btn btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.9rem;">Kayıt Ol</a>
+                    
                     <?php endif; ?>
                 </div>
             </div>
         </nav>
     </header>
-    
-    <div style="padding-top: 80px;"></div>

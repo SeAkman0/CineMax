@@ -1,18 +1,31 @@
 <?php 
-include 'config/database.php'; 
-include 'includes/header.php';
+// =======================================================
+//  1. AYARLAR VE GEREKLİ DOSYALAR
+// =======================================================
+include 'config/database.php'; // Veritabanı bağlantısı
+include 'includes/header.php'; // Üst menü (Logo, Linkler)
 
+// URL'de ?id=... yoksa ana sayfaya gönder (Hata önleme)
 if (!isset($_GET['id'])) { echo "<script>window.location.href='index.php';</script>"; exit; }
-$film_id = $_GET['id'];
+$film_id = $_GET['id']; // Gösterilecek filmin ID'si
 
-// 1. Ana Film Bilgisi
+// ---------------------------------------------------------
+//  2. VERİTABANI SORGULARI
+// ---------------------------------------------------------
+
+// A. ANA FİLM BİLGİSİNİ ÇEKME
+// Bu sayfada gösterilecek filmin tüm detaylarını (Adı, Konusu, Fragmanı vb.) alıyoruz.
 $stmt = $pdo->prepare("SELECT * FROM films WHERE id = ?");
 $stmt->execute([$film_id]);
 $film = $stmt->fetch();
 
+// Eğer film bulunamazsa (Silinmişse veya ID yanlışsa)
 if (!$film) { echo "<div class='container'>Film bulunamadı.</div>"; include 'includes/footer.php'; exit; }
 
-// 2. Diğer Vizyondaki Filmler (Bu film hariç rastgele 4 tane)
+// B. DİĞER FİLMLERİ ÇEKME (Öneri Sistemi)
+// Kullanıcının ilgisini çekebilecek başka filmleri listeliyoruz.
+// 'id != ?' diyerek şu an bakılan filmi listeden hariç tutuyoruz.
+// 'ORDER BY RAND()' ile her sayfa yenilendiğinde rastgele farklı filmler getiriyoruz.
 $stmtOther = $pdo->prepare("SELECT * FROM films WHERE is_active = 1 AND id != ? ORDER BY RAND() LIMIT 4");
 $stmtOther->execute([$film_id]);
 $otherFilms = $stmtOther->fetchAll();
@@ -25,6 +38,7 @@ $otherFilms = $stmtOther->fetchAll();
              style="width:300px; border-radius:10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
         
         <div style="flex:1;">
+            
             <h1 style="font-size:3rem; margin-bottom:10px;"><?php echo $film['title']; ?></h1>
             
             <div style="display:flex; gap:20px; font-size:1.1rem; color:#ccc; margin-bottom:20px;">
@@ -39,19 +53,21 @@ $otherFilms = $stmtOther->fetchAll();
             </p>
 
             <div style="display:flex; gap:15px;">
-                <a href="booking.php?id=<?php echo $film['id']; ?>" class="btn btn-primary" style="padding:12px 30px; font-size:1.1rem;">
+                
+                <a href="booking.php?id=<?php echo $film['id']; ?>#seanslar" class="btn btn-primary" style="padding:12px 30px; font-size:1.1rem;">
                     <i class="fas fa-ticket-alt"></i> Hemen Bilet Al
                 </a>
                 
                 <?php if (!empty($film['trailer_url'])): ?>
-                <a href="<?php echo $film['trailer_url']; ?>" target="_blank" class="btn btn-secondary" style="padding:12px 30px; font-size:1.1rem; display:inline-flex; align-items:center; gap:8px;">
-                    <i class="fas fa-play"></i> Fragmanı İzle
-                </a>
+                    <a href="<?php echo $film['trailer_url']; ?>" target="_blank" class="btn btn-secondary" style="padding:12px 30px; font-size:1.1rem; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-play"></i> Fragmanı İzle
+                    </a>
                 <?php else: ?>
-                <button class="btn btn-secondary" style="padding:12px 30px; font-size:1.1rem; opacity:0.5; cursor:not-allowed;" disabled>
-                    <i class="fas fa-play"></i> Fragman Yok
-                </button>
+                    <button class="btn btn-secondary" style="padding:12px 30px; font-size:1.1rem; opacity:0.5; cursor:not-allowed;" disabled>
+                        <i class="fas fa-play"></i> Fragman Yok
+                    </button>
                 <?php endif; ?>
+
             </div>
         </div>
     </div>
@@ -61,9 +77,12 @@ $otherFilms = $stmtOther->fetchAll();
     <h2 class="section-title">Bunları da Beğenebilirsiniz</h2>
     
     <div class="movies-grid">
+        
         <?php foreach($otherFilms as $other): ?>
+        
         <div class="movie-card">
             <img src="<?php echo $other['poster_url']; ?>" alt="<?php echo $other['title']; ?>">
+            
             <div class="movie-info">
                 <h3><?php echo $other['title']; ?></h3>
                 <div style="display:flex; justify-content:space-between; color:#666; font-size:0.9rem; margin-top:5px;">
@@ -71,15 +90,17 @@ $otherFilms = $stmtOther->fetchAll();
                     <span class="rating"><i class="fas fa-star"></i> 8.5</span>
                 </div>
             </div>
+            
             <div class="movie-footer">
-                <a href="booking.php?id=<?php echo $other['id']; ?>" class="btn btn-primary" style="width:100%;">Bilet Al</a>
+                <a href="booking.php?id=<?php echo $other['id']; ?>#seanslar" class="btn btn-primary" style="width:100%;">Bilet Al</a>
             </div>
             <div class="movie-footer" style="padding-top:0;">
                 <a href="movie-details.php?id=<?php echo $other['id']; ?>" class="btn btn-secondary" style="width:100%; border:1px solid #ddd; color:#333;">İncele</a>
             </div>
         </div>
+
         <?php endforeach; ?>
-    </div>
+        </div>
 </div>
 
 <?php include 'includes/footer.php'; ?>

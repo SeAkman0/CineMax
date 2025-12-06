@@ -1,40 +1,74 @@
 <?php 
-include 'header.php';
+// =======================================================
+//  1. AYARLAR VE GEREKLİLİKLER
+// =======================================================
 
-// --- SEANS EKLEME İŞLEMİ ---
+// Admin paneli üst menüsünü (header) dahil ediyoruz.
+// Bu dosyanın içinde oturum kontrolü, veritabanı bağlantısı vb. var.
+include 'header.php'; 
+
+
+// =======================================================
+//  2. SEANS EKLEME İŞLEMİ (POST)
+// =======================================================
+
+// Eğer sayfaya bir form (POST) gönderildiyse bu blok çalışır.
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $film_id = $_POST['film_id'];
-    $hall_id = $_POST['hall_id'];
-    $start_time = $_POST['start_time'];
-    $price = $_POST['price'];
+    
+    // Formdan gelen verileri değişkenlere alıyoruz.
+    $film_id = $_POST['film_id'];       // Hangi film?
+    $hall_id = $_POST['hall_id'];       // Hangi salon?
+    $start_time = $_POST['start_time']; // Tarih ve Saat
+    $price = $_POST['price'];           // Bilet Ücreti
 
+    // Veritabanına Kayıt Sorgusu
+    // (Prepare kullanarak SQL Injection saldırılarını önlüyoruz)
     $sql = "INSERT INTO sessions (film_id, hall_id, start_time, price) VALUES (?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
+    
+    // Sorguyu çalıştır
     $stmt->execute([$film_id, $hall_id, $start_time, $price]);
     
-    echo "<script>window.location.href='sessions.php';</script>";
-    exit;
+    // İşlem bitince sayfayı yenile (Formun tekrar gönderilmesini önlemek için)
+    echo "<script>window.location.href='showtimes.php';</script>";
+    exit; // Kodun devamını çalıştırma
 }
 
-// Dropdown Verileri
+
+// =======================================================
+//  3. VERİLERİ ÇEKME (DROPDOWN MENÜLER İÇİN)
+// =======================================================
+
+// A. FİLMLERİ ÇEKME
+// Sadece vizyonda olan (is_active = 1) filmleri listeliyoruz.
+// İsim sırasına göre (A-Z) getiriyoruz ki admin kolay bulsun.
 $films = $pdo->query("SELECT * FROM films WHERE is_active = 1 ORDER BY title ASC")->fetchAll();
+
+// B. SALONLARI ÇEKME
+// Tüm salonları isim sırasına göre getiriyoruz.
 $halls = $pdo->query("SELECT * FROM halls ORDER BY name ASC")->fetchAll();
 
-// --- SIRALAMA MANTIĞI ---
 
-// Hangi başlığa tıklayınca veritabanında nereye göre sıralasın? (Mapping)
+// =======================================================
+//  4. SIRALAMA (SORTING) MANTIĞI
+// =======================================================
+
+// İzin verilen sıralama sütunları (Whitelist - Güvenlik İçin)
+// URL'deki 'sort' parametresine göre SQL'de hangi sütunu kullanacağımızı belirliyoruz.
 $sortable_columns = [
-    'date' => 'sessions.start_time',
-    'film' => 'films.title', // Film adına göre sırala
-    'hall' => 'halls.name',  // Salon adına göre sırala
-    'price' => 'sessions.price'
+    'date' => 'sessions.start_time', // Tarihe göre
+    'film' => 'films.title',         // Film adına göre
+    'hall' => 'halls.name',          // Salon adına göre
+    'price' => 'sessions.price'      // Fiyata göre
 ];
 
-// URL'den gelen veriyi al
+// URL'den gelen parametreleri al (Yoksa varsayılanları kullan)
 $sort = isset($_GET['sort']) && array_key_exists($_GET['sort'], $sortable_columns) ? $_GET['sort'] : 'date';
 $dir = isset($_GET['dir']) && strtoupper($_GET['dir']) == 'ASC' ? 'ASC' : 'DESC';
 
-// Sorguyu Hazırla (ORDER BY kısmını dinamik yaptık)
+// SEANSLARI LİSTELEME SORGUSU
+// Seans tablosunda sadece film_id ve hall_id var (Sayılar).
+// Bize Film Adı ve Salon Adı lazım olduğu için JOIN ile diğer tablolara bağlanıyoruz.
 $sql = "SELECT sessions.*, films.title as film_name, halls.name as hall_name 
         FROM sessions 
         JOIN films ON sessions.film_id = films.id 
@@ -44,10 +78,14 @@ $sql = "SELECT sessions.*, films.title as film_name, halls.name as hall_name
 $stmt = $pdo->query($sql);
 $sessions = $stmt->fetchAll();
 
-// --- YARDIMCI FONKSİYON: BAŞLIK LİNKİ ---
+
+// --- YARDIMCI FONKSİYON: BAŞLIK LİNKİ OLUŞTURMA ---
+// Tablo başlıklarına tıklandığında sıralama yönünü değiştiren link üretir.
 function createSortLink($column, $label, $currentSort, $currentDir) {
+    // Yön değiştirme mantığı: Şu an ASC ise DESC yap, değilse ASC yap.
     $newDir = ($currentSort == $column && $currentDir == 'ASC') ? 'DESC' : 'ASC';
     
+    // İkon belirleme
     $icon = '<i class="fas fa-sort" style="color:#ccc; opacity:0.3; font-size:0.8rem;"></i>';
     if ($currentSort == $column) {
         $icon = ($currentDir == 'ASC') 
@@ -73,6 +111,7 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
             </h3>
             
             <form method="POST" action="">
+                
                 <div style="margin-bottom:15px;">
                     <label style="display:block; margin-bottom:5px; font-weight:600;">Film Seç</label>
                     <select name="film_id" required style="width: 100%; padding: 10px; border:1px solid #ddd; border-radius:5px;">
@@ -99,6 +138,7 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
                         <input type="datetime-local" name="start_time" required 
                                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
                     </div>
+                    
                     <div style="flex:1;">
                         <label style="display:block; margin-bottom:5px; font-weight:600;">Ücret (TL)</label>
                         <input type="number" name="price" step="0.50" value="150" required 
@@ -130,21 +170,26 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
                 <tbody>
                     <?php foreach ($sessions as $session): ?>
                     <tr style="border-bottom:1px solid #eee;">
+                        
                         <td style="padding:12px; color:#1e90ff; font-weight:bold;">
                             <?php echo date("d.m.Y H:i", strtotime($session['start_time'])); ?>
                         </td>
+                        
                         <td style="padding:12px;"><strong><?php echo $session['film_name']; ?></strong></td>
+                        
                         <td style="padding:12px; color:#555;"><?php echo $session['hall_name']; ?></td>
+                        
                         <td style="padding:12px;">
                             <span style="background:#eafaf1; color:#2ecc71; padding:3px 8px; border-radius:10px; font-weight:bold; font-size:0.85rem;">
                                 <?php echo $session['price']; ?> ₺
                             </span>
                         </td>
+                        
                         <td style="padding:12px;">
                             <a href="delete-showtime.php?id=<?php echo $session['id']; ?>" 
                                class="btn btn-sm btn-danger"
                                style="background:#ff4757; color:white; text-decoration:none; padding:5px 10px; border-radius:5px;"
-                               onclick="return confirm('Silmek istiyor musunuz?')">
+                               onclick="return confirm('Bu seansı silmek istediğinize emin misiniz? Satılan biletler de silinecektir.')">
                                <i class="fas fa-trash"></i> Sil
                             </a>
                         </td>
@@ -161,5 +206,4 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
 
 </div>
 
-</div> </body>
-</html>
+<?php include 'footer.php'; ?>

@@ -1,32 +1,55 @@
 <?php 
-include 'header.php';
+// =======================================================
+//  1. AYARLAR VE GEREKLİLİKLER
+// =======================================================
 
-// --- 1. SIRALAMA MANTIĞI ---
+// Admin paneli menüsünü ve veritabanı bağlantısını dahil ediyoruz.
+include 'header.php'; 
 
-// İzin verilen sütunlar (Güvenlik için şart!)
+
+// =======================================================
+//  2. SIRALAMA (SORTING) MANTIĞI
+// =======================================================
+
+// --- A. GÜVENLİK (WHITELIST) ---
+// URL'den gelen 'sort' parametresini direkt SQL'e yazarsak SQL Injection açığı oluşur.
+// Bu yüzden sadece izin verdiğimiz sütun isimlerini bir listeye (array) koyuyoruz.
 $allowed_columns = ['id', 'username', 'email', 'role', 'created_at'];
 
-// URL'den gelen 'sort' verisini al, eğer yoksa veya listede yoksa varsayılan 'id' olsun
+// --- B. PARAMETRELERİ ALMA ---
+// URL'de ?sort=username var mı? Ve bu değer izin verilenler listesinde mi?
+// Evetse o değeri al, yoksa varsayılan olarak 'id'ye göre sırala.
 $sort = isset($_GET['sort']) && in_array($_GET['sort'], $allowed_columns) ? $_GET['sort'] : 'id';
 
-// URL'den gelen 'dir' (yön) verisini al, eğer yoksa veya hatalıysa varsayılan 'DESC' olsun
+// URL'de ?dir=ASC var mı?
+// Evetse 'ASC' (Artan), yoksa varsayılan olarak 'DESC' (Azalan) kullan.
 $dir = isset($_GET['dir']) && strtoupper($_GET['dir']) == 'ASC' ? 'ASC' : 'DESC';
 
-// Bir sonraki tıklamada yön ne olsun? (Şu an ASC ise DESC yap, yoksa ASC yap)
+// --- C. YÖN DEĞİŞTİRME (TOGGLE) ---
+// Kullanıcı başlığa tıkladığında, mevcut sıralamanın tersini yapmak istiyoruz.
+// Şu an ASC ise bir sonraki tıklamada DESC olsun.
 $new_dir = ($dir == 'ASC') ? 'DESC' : 'ASC';
 
-// Sorguyu Hazırla (Değişkenleri güvenli şekilde yerleştirdik)
+// --- D. VERİTABANI SORGUSU ---
+// Hazırladığımız güvenli değişkenleri sorguya yerleştiriyoruz.
 $sql = "SELECT * FROM users ORDER BY $sort $dir";
 $stmt = $pdo->query($sql);
 $users = $stmt->fetchAll();
 
-// --- OK YARDIMCI FONKSİYONU ---
-// Hangi başlığın sıralandığını göstermek için ikon koyar
+
+// =======================================================
+//  3. YARDIMCI FONKSİYON (GÖRSEL)
+// =======================================================
+
+// Bu fonksiyon, tablo başlıklarının yanına küçük ok işaretleri (⬆⬇) koyar.
 function sortIcon($column, $current_sort, $current_dir) {
+    // Eğer şu an sıralanan sütun buysa:
     if ($column == $current_sort) {
+        // Yöne göre yukarı veya aşağı ok göster.
         return $current_dir == 'ASC' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>';
     }
-    return '<i class="fas fa-sort" style="color:#ccc; opacity:0.5;"></i>'; // Pasif ikon
+    // Değilse, pasif (gri) bir sıralama ikonu göster.
+    return '<i class="fas fa-sort" style="color:#ccc; opacity:0.5;"></i>'; 
 }
 ?>
 
@@ -74,12 +97,15 @@ function sortIcon($column, $current_sort, $current_dir) {
             </tr>
         </thead>
         <tbody>
+            
             <?php foreach($users as $user): ?>
             <tr style="border-bottom:1px solid #eee;">
+                
                 <td style="padding:12px;">#<?php echo $user['id']; ?></td>
                 
                 <td style="padding:12px;">
                     <strong><?php echo $user['username']; ?></strong>
+                    
                     <?php if($user['id'] == $_SESSION['user_id']): ?>
                         <span style="color:#2ecc71; font-size:0.8rem;">(Sen)</span>
                     <?php endif; ?>
@@ -107,7 +133,7 @@ function sortIcon($column, $current_sort, $current_dir) {
                            <i class="fas fa-trash"></i>
                         </a>
                     <?php else: ?>
-                        <span style="color:#ccc;"><i class="fas fa-lock"></i></span>
+                        <span style="color:#ccc;" title="Kendinizi silemezsiniz"><i class="fas fa-lock"></i></span>
                     <?php endif; ?>
                 </td>
             </tr>
@@ -133,6 +159,4 @@ function sortIcon($column, $current_sort, $current_dir) {
     }
 </style>
 
-</div>
-</body>
-</html>
+<?php include 'footer.php'; ?>

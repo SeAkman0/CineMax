@@ -123,3 +123,60 @@ html { scroll-behavior: smooth; }
 .footer a:hover { color: #1e90ff; }
 .social-links a { margin-right: 10px; font-size: 1.2rem; }
 .footer-bottom { text-align: center; border-top: 1px solid #34495e; padding-top: 2rem; color: #bdc3c7; }
+
+
+/* --- ADMIN SIDEBAR TOGGLE (AÇILIR/KAPANIR) --- */
+
+/* Sidebar Geçiş Animasyonu */
+.sidebar {
+    transition: width 0.3s ease; /* Sadece genişlik animasyonu */
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap; /* Yazıların alt satıra düşmesini engeller */
+}
+
+/* KÜÇÜLMÜŞ HALİ (.collapsed sınıfı eklenince) */
+.sidebar.collapsed {
+    width: 60px; /* Daha dar yaptık (Eskisi 70px veya 260px idi) */
+}
+
+/* Küçülünce Yazıları ve Başlıkları Gizle */
+.sidebar.collapsed span,
+.sidebar.collapsed h2 span,
+.sidebar.collapsed p span {
+    display: none;
+    opacity: 0;
+}
+
+/* Küçülünce Başlık ve Alt Başlık Ayarı */
+.sidebar.collapsed h2, 
+.sidebar.collapsed p {
+    text-align: center;
+    margin: 0;
+    padding: 5px 0;
+}
+/* Başlıklar (Logo ve Alt Yazı) */
+.sidebar h2 { 
+    text-align: left; /* Sola yasla */
+    padding-left: 20px; /* Menü linkleriyle aynı hizaya getir */
+    font-size: 1.5rem; 
+    margin-bottom: 5px; 
+    color: #fff; 
+    white-space: nowrap; 
+}
+
+.sidebar p { 
+    text-align: left; /* Sola yasla */
+    padding-left: 20px; /* Hizala */
+    font-size: 0.9rem; 
+    color: #adb5bd; 
+    margin-bottom: 20px; 
+    white-space: nowrap; 
+}
+
+/* Küçülünce (Collapsed) Tekrar Ortala */
+.sidebar.collapsed h2, 
+.sidebar.collapsed p {
+    text-align: center; /* Küçülünce ortada dursun */
+    padding-left: 0;    /* Boşluğu sıfırla */
+}

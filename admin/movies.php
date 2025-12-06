@@ -1,65 +1,108 @@
 <?php 
-include 'header.php';
+// =======================================================
+//  1. AYARLAR VE GEREKLİLİKLER
+// =======================================================
 
-// --- 1. DURUM GÜNCELLEME İŞLEMİ ---
+// Admin paneli menüsünü ve veritabanı bağlantısını dahil ediyoruz.
+// Bu dosyanın içinde session kontrolü ve güvenlik önlemleri zaten var.
+include 'header.php'; 
+
+
+// =======================================================
+//  2. DURUM GÜNCELLEME İŞLEMİ (AJAX GİBİ POST)
+// =======================================================
+
+// Tablodaki "Yayında / Pasif" kutusu değiştirildiğinde burası çalışır.
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
+    
     $film_id = $_POST['film_id'];
-    $new_status = $_POST['new_status']; 
+    $new_status = $_POST['new_status']; // 1 = Aktif, 0 = Pasif
+    
+    // Veritabanında filmin durumunu güncelle
     $sql = "UPDATE films SET is_active = ? WHERE id = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$new_status, $film_id]);
+    
+    // İşlem bitince sayfayı yenile (msg parametresi ile başarı mesajı gösterilebilir)
     echo "<script>window.location.href='movies.php?msg=updated';</script>";
-    exit;
+    exit; // Kodun devamını çalıştırma
 }
 
-// --- 2. FİLM EKLEME İŞLEMİ ---
+
+// =======================================================
+//  3. YENİ FİLM EKLEME İŞLEMİ (DOSYA YÜKLEMELİ)
+// =======================================================
+
+// Sol taraftaki form gönderildiğinde burası çalışır.
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_film'])) {
+    
+    // Formdan gelen metin verilerini al
     $title = $_POST['title'];
     $desc = $_POST['description'];
     $duration = $_POST['duration'];
-    $trailer = $_POST['trailer_url']; // Yeni Eklenen Fragman Linki
+    $trailer = $_POST['trailer_url']; 
     
-    // Dosya Yükleme İşlemleri
-    $target_dir = "../assets/images/posters/";
-    $db_path_dir = "assets/images/posters/";
+    // --- DOSYA YÜKLEME AYARLARI ---
+    $target_dir = "../assets/images/posters/"; // Fiziksel olarak yüklenecek klasör (Admin'den bir üst dizine çık)
+    $db_path_dir = "assets/images/posters/";   // Veritabanına yazılacak yol (Site kökünden itibaren)
     
+    // Dosya seçilmiş mi ve hata yok mu kontrol et
     if (isset($_FILES["poster_file"]) && $_FILES["poster_file"]["error"] == 0) {
         
+        // Dosya uzantısını al (jpg, png)
         $file_extension = pathinfo($_FILES["poster_file"]["name"], PATHINFO_EXTENSION);
+        
+        // Benzersiz bir isim üret (Zaman damgası + Rastgele ID)
+        // Bu sayede aynı isimli iki resim yüklenirse çakışmaz.
         $unique_name = time() . "_" . uniqid() . "." . $file_extension;
         
-        $target_file = $target_dir . $unique_name;
-        $db_save_path = $db_path_dir . $unique_name;
+        // Hedef yollar
+        $target_file = $target_dir . $unique_name;     // C:/xampp/.../assets/images/posters/123.jpg
+        $db_save_path = $db_path_dir . $unique_name;   // assets/images/posters/123.jpg
 
+        // Resmi geçici klasörden (tmp) hedef klasöre taşı
         if (move_uploaded_file($_FILES["poster_file"]["tmp_name"], $target_file)) {
             
-            // Veritabanına Kaydet (trailer_url eklendi)
+            // --- VERİTABANINA KAYIT ---
             $sql = "INSERT INTO films (title, description, poster_url, duration, trailer_url, is_active) VALUES (?, ?, ?, ?, ?, 1)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$title, $desc, $db_save_path, $duration, $trailer]);
             
+            // Başarılıysa sayfayı yenile
             echo "<script>window.location.href='movies.php';</script>";
             exit;
             
         } else {
-            echo "<script>alert('Resim yüklenirken hata oluştu.');</script>";
+            echo "<script>alert('Resim sunucuya yüklenirken bir hata oluştu.');</script>";
         }
     } else {
         echo "<script>alert('Lütfen bir resim dosyası seçiniz.');</script>";
     }
 }
 
-// --- LİSTELEME ---
+
+// =======================================================
+//  4. SIRALAMA VE LİSTELEME MANTIĞI
+// =======================================================
+
+// Sıralanabilir sütunların listesi (Güvenlik için Whitelist)
 $sortable_columns = ['id'=>'id', 'title'=>'title', 'duration'=>'duration', 'status'=>'is_active'];
+
+// URL'den gelen parametreleri al (Yoksa varsayılanları kullan)
 $sort = isset($_GET['sort']) && array_key_exists($_GET['sort'], $sortable_columns) ? $_GET['sort'] : 'id';
 $dir = isset($_GET['dir']) && strtoupper($_GET['dir']) == 'ASC' ? 'ASC' : 'DESC';
 
+// Filmleri Çek
 $sql = "SELECT * FROM films ORDER BY " . $sortable_columns[$sort] . " " . $dir;
 $stmt = $pdo->query($sql);
 $films = $stmt->fetchAll();
 
+// --- YARDIMCI FONKSİYON: BAŞLIK LİNKİ ---
+// Tablo başlıklarına tıklandığında sıralama yönünü (ASC/DESC) değiştiren link üretir.
 function createSortLink($column, $label, $currentSort, $currentDir) {
     $newDir = ($currentSort == $column && $currentDir == 'ASC') ? 'DESC' : 'ASC';
+    
+    // Aktif sütunsa ok işareti göster
     $icon = '<i class="fas fa-sort" style="color:#ccc; opacity:0.3; font-size:0.8rem;"></i>';
     if ($currentSort == $column) {
         $icon = ($currentDir == 'ASC') ? '<i class="fas fa-sort-up" style="color:#333;"></i>' : '<i class="fas fa-sort-down" style="color:#333;"></i>';
@@ -69,7 +112,7 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
 ?>
 
 <h1>Film Yönetimi</h1>
-<p style="color:#666; margin-bottom:20px;">Filmleri yönetin ve fragman linklerini ekleyin.</p>
+<p style="color:#666; margin-bottom:20px;">Filmleri yönetin, afiş yükleyin ve vizyon durumlarını değiştirin.</p>
 
 <div style="display: flex; gap: 30px; flex-wrap: wrap;">
 
@@ -113,7 +156,7 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
                 </div>
 
                 <button type="submit" class="btn btn-sm" style="background:#2ecc71; color:white; border:none; padding:10px 20px; font-size:1rem; cursor:pointer; width:100%; margin-top:10px;">
-                    Kaydet
+                    <i class="fas fa-save"></i> Kaydet ve Yükle
                 </button>
             </form>
         </div>
@@ -129,7 +172,8 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
                         <th style="padding:12px;"><?php echo createSortLink('id', 'ID', $sort, $dir); ?></th>
                         <th style="padding:12px;">Afiş</th>
                         <th style="padding:12px;"><?php echo createSortLink('title', 'Film Adı', $sort, $dir); ?></th>
-                        <th style="padding:12px;">Fragman</th> <th style="padding:12px;"><?php echo createSortLink('status', 'Durum', $sort, $dir); ?></th>
+                        <th style="padding:12px;">Fragman</th> 
+                        <th style="padding:12px;"><?php echo createSortLink('status', 'Durum', $sort, $dir); ?></th>
                         <th style="padding:12px; text-align:left;">İşlem</th>
                     </tr>
                 </thead>
@@ -139,8 +183,11 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
                         <td style="padding:12px;">#<?php echo $film['id']; ?></td>
                         
                         <td style="padding:12px;">
-                            <?php $imgSrc = (strpos($film['poster_url'], 'http') === 0) ? $film['poster_url'] : '../' . $film['poster_url']; ?>
-                            <img src="<?php echo $imgSrc; ?>" width="40" height="60" style="object-fit:cover; border-radius:4px;">
+                            <?php 
+                                // Eski linkleri (http) ve yeni yüklenenleri (assets/) ayırt et
+                                $imgSrc = (strpos($film['poster_url'], 'http') === 0) ? $film['poster_url'] : '../' . $film['poster_url']; 
+                            ?>
+                            <img src="<?php echo $imgSrc; ?>" width="40" height="60" style="object-fit:cover; border-radius:4px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">
                         </td>
                         
                         <td style="padding:12px;">
@@ -164,7 +211,9 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
                                 <input type="hidden" name="film_id" value="<?php echo $film['id']; ?>">
                                 <?php 
                                     $is_active = $film['is_active'] == 1;
-                                    $style = $is_active ? "background:#eafaf1; color:#2ecc71; border:1px solid #2ecc71;" : "background:#fbeaea; color:#e74c3c; border:1px solid #e74c3c;";
+                                    $style = $is_active 
+                                        ? "background:#eafaf1; color:#2ecc71; border:1px solid #2ecc71;" 
+                                        : "background:#fbeaea; color:#e74c3c; border:1px solid #e74c3c;";
                                 ?>
                                 <select name="new_status" onchange="this.form.submit()" style="padding:5px; border-radius:5px; font-weight:bold; cursor:pointer; <?php echo $style; ?>">
                                     <option value="1" <?php echo $is_active ? 'selected' : ''; ?>>Yayında</option>
@@ -174,18 +223,24 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
                         </td>
                         
                         <td style="padding:12px;">
-                            <a href="delete-movie.php?id=<?php echo $film['id']; ?>" class="btn btn-sm btn-danger" style="background:#ff4757; color:white; text-decoration:none; padding:5px 10px; border-radius:5px;" onclick="return confirm('Silmek istediğinize emin misiniz?')">
-                                <i class="fas fa-trash"></i>
+                            <a href="delete-movie.php?id=<?php echo $film['id']; ?>" 
+                               class="btn btn-sm btn-danger" 
+                               style="background:#ff4757; color:white; text-decoration:none; padding:5px 10px; border-radius:5px;" 
+                               onclick="return confirm('Bu filmi silmek istediğinize emin misiniz? Bağlı seanslar ve biletler de silinecektir.')">
+                                <i class="fas fa-trash"></i> Sil
                             </a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
+
+                    <?php if(count($films) == 0): ?>
+                        <tr><td colspan="6" style="text-align:center; padding:20px;">Henüz film eklenmemiş.</td></tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 
 </div>
-</div>
-</body>
-</html>
+
+<?php include 'footer.php'; ?>
