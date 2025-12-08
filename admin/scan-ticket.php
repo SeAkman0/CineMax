@@ -115,4 +115,3 @@ include 'header.php';
     html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 </script>
 
-<?php include 'footer.php'; ?>

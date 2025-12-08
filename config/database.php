@@ -54,6 +54,4 @@ try {
     // İşlemi durdur ve hatayı ekrana bas.
     die("Veritabanı bağlantı hatası: " . $e->getMessage());
 }
-// NOT: Bu dosyanın sonuna asla ?> (kapatma etiketi) koymuyoruz.
-// Sebebi: Eğer ?> sonrasında yanlışlıkla bir boşluk bırakılırsa,
-// bu boşluk tüm sayfalara yansır ve tasarım hatalarına (beyaz çizgi) yol açar.
+?> 

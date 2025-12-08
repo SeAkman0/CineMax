@@ -206,4 +206,3 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
 
 </div>
 
-<?php include 'footer.php'; ?>

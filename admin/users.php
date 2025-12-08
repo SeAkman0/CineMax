@@ -159,4 +159,3 @@ function sortIcon($column, $current_sort, $current_dir) {
     }
 </style>
 
-<?php include 'footer.php'; ?>

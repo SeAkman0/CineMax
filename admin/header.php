@@ -155,14 +155,15 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <a href="movies.php" class="<?php echo ($current_page == 'movies.php') ? 'active' : ''; ?>">
                 <i class="fas fa-video fa-fw"></i> <span>Film Yönetimi</span>
             </a>
+
+            <a href="halls.php" class="<?php echo ($current_page == 'halls.php') ? 'active' : ''; ?>">
+                <i class="fas fa-chair fa-fw"></i> <span>Salon Yönetimi</span>
+            </a>
             
             <a href="showtimes.php" class="<?php echo ($current_page == 'showtimes.php') ? 'active' : ''; ?>">
                 <i class="fas fa-clock fa-fw"></i> <span>Seans Yönetimi</span>
             </a>
             
-            <a href="halls.php" class="<?php echo ($current_page == 'halls.php') ? 'active' : ''; ?>">
-                <i class="fas fa-chair fa-fw"></i> <span>Salon Yönetimi</span>
-            </a>
 
             <a href="tickets.php" class="<?php echo ($current_page == 'tickets.php') ? 'active' : ''; ?>">
                 <i class="fas fa-ticket-alt fa-fw"></i> <span>Biletler</span>

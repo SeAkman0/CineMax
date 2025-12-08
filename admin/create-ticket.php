@@ -375,4 +375,3 @@ $films = $pdo->query("SELECT id, title FROM films WHERE is_active = 1 ORDER BY t
     }
 </script>
 
-<?php include 'footer.php'; ?>

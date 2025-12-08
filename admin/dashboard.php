@@ -236,4 +236,3 @@ $recentSales = $pdo->query($sqlRecentSales)->fetchAll();
 
 </div>
 
-<?php include 'footer.php'; ?>
