@@ -189,8 +189,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['selected_seats'])) {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'cmax131415@gmail.com'; // Gönderen Mail
-            $mail->Password   = 'mawm khmr ehez zxhr';  // Uygulama Şifresi
+            $mail->Username   = '-@gmail.com'; // Gönderen Mail
+            $mail->Password   = '-';  // Uygulama Şifresi
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Güvenli Bağlantı (SSL)
             $mail->Port       = 465; // SSL Portu
 
