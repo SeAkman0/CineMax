@@ -170,6 +170,7 @@ $recentSales = $pdo->query($sqlRecentSales)->fetchAll();
                     <th>Film Adı</th>
                     <th>Satılan Bilet</th>
                     <th>Toplam Kazanç</th>
+                    
                 </tr>
             </thead>
             <tbody>
