@@ -14,10 +14,12 @@ body {
 a { text-decoration: none; }
 html { scroll-behavior: smooth; }
 
-/* Container */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+/* Container (Genişletildi: 1300px) */
+.container { max-width: 1300px; margin: 0 auto; padding: 0 20px; }
 
-/* Header & Navbar */
+/* =========================================
+   HEADER & NAVBAR (FERAH GÖRÜNÜM ENTEGRE EDİLDİ)
+   ========================================= */
 .header { 
     background: linear-gradient(135deg, #1e90ff 0%, #0077b6 100%); 
     box-shadow: 0 2px 20px rgba(0,0,0,0.1); 
@@ -26,25 +28,93 @@ html { scroll-behavior: smooth; }
     z-index: 1000; 
     height: 80px; 
 }
-.navbar { padding: 0; height: 100%; display:flex; align-items:center; }
-.nav-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; width:100%; }
 
-/* LOGO (Sabit) */
-.nav-logo { display: flex; align-items: center; color: white; font-size: 1.8rem; font-weight: 700; }
-.nav-logo i { 
-    margin-right: 10px; 
-    font-size: 2rem; 
-    /* Animasyon kodları kaldırıldı */
+.navbar { 
+    padding: 0; 
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
 }
 
-.nav-menu { display: flex; list-style: none; gap: 2rem; }
-.nav-link { color: white; padding: 0.5rem 1rem; border-radius: 25px; transition: all 0.3s ease; font-weight: 500; }
-.nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
-.nav-actions { display: flex; gap: 1rem; align-items: center; }
+/* Nav Container (Genişletildi ve Düzenlendi) */
+.nav-container { 
+    max-width: 1300px; /* Genişlik artırıldı */
+    margin: 0 auto; 
+    padding: 0 20px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    width: 100%; 
+    height: 100%;
+}
+
+/* LOGO */
+.nav-logo { 
+    display: flex; 
+    align-items: center; 
+    color: white; 
+    font-size: 1.8rem; 
+    font-weight: 700; 
+    text-decoration: none;
+    gap: 12px;
+    margin-right: 50px; /* Menüden uzaklaştırıldı */
+}
+.nav-logo i { font-size: 2.2rem; }
+
+/* MENÜ LİSTESİ */
+.nav-menu { 
+    display: flex; 
+    align-items: center;
+    list-style: none; 
+    margin: 0; 
+    padding: 0; 
+    gap: 40px; /* Linkler arası boşluk artırıldı (Ferahlık için) */
+}
+
+/* MENÜ LİNKLERİ */
+.nav-link { 
+    color: white; 
+    padding: 0.6rem 1.2rem; /* Buton içi boşluk artırıldı */
+    border-radius: 25px; 
+    transition: all 0.3s ease; 
+    font-weight: 500; 
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.nav-link:hover, .nav-link.active { 
+    background: rgba(255,255,255,0.2); 
+    transform: translateY(-2px); 
+}
+
+/* SAĞ TARAF (Kullanıcı Paneli) */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    margin-left: 50px; /* Menüden uzaklaştırıldı */
+    gap: 20px;
+}
 .btn-icon { background: rgba(255,255,255,0.2); border: none; color: white; padding: 0.8rem; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; }
 .btn-icon:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
 
-/* Hero Section */
+/* Admin Linki Rengi */
+.nav-link[href*="admin"] {
+    background: rgba(255,255,255,0.9);
+    color: #ff4757 !important;
+    font-weight: bold;
+    padding: 0.6rem 1.5rem;
+}
+.nav-link[href*="admin"]:hover {
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+
+/* =========================================
+   HERO SECTION
+   ========================================= */
 .hero { 
     background: linear-gradient(135deg, #1e90ff 0%, #0077b6 100%); 
     padding: 80px 0 80px; 
@@ -52,7 +122,6 @@ html { scroll-behavior: smooth; }
     align-items: center; 
     min-height: 80vh; 
     color: white; 
-    /* Header ile birleşmesi için yukarı çekildi */
     margin-top: -80px; 
     padding-top: 160px; 
 }
@@ -109,7 +178,7 @@ html { scroll-behavior: smooth; }
 .seat-info { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; background: #fff; padding: 15px; border-radius: 10px; }
 .seat-sample { width: 20px; height: 20px; border-radius: 4px; display:inline-block; vertical-align:middle; margin-right:5px;}
 
-/* Animasyonlar (Sadece Koltuk ve Arama için) */
+/* Animasyonlar */
 @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
 @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
 .seat.anim-pop { animation: pop 0.3s ease; }
@@ -124,23 +193,22 @@ html { scroll-behavior: smooth; }
 .social-links a { margin-right: 10px; font-size: 1.2rem; }
 .footer-bottom { text-align: center; border-top: 1px solid #34495e; padding-top: 2rem; color: #bdc3c7; }
 
-
-/* --- ADMIN SIDEBAR TOGGLE (AÇILIR/KAPANIR) --- */
+/* =========================================
+   ADMIN SIDEBAR & DASHBOARD
+   ========================================= */
 
 /* Sidebar Geçiş Animasyonu */
 .sidebar {
-    transition: width 0.3s ease; /* Sadece genişlik animasyonu */
+    transition: width 0.3s ease;
     overflow: hidden;
     position: relative;
-    white-space: nowrap; /* Yazıların alt satıra düşmesini engeller */
+    white-space: nowrap;
 }
 
-/* KÜÇÜLMÜŞ HALİ (.collapsed sınıfı eklenince) */
-.sidebar.collapsed {
-    width: 60px; /* Daha dar yaptık (Eskisi 70px veya 260px idi) */
-}
+/* KÜÇÜLMÜŞ HALİ */
+.sidebar.collapsed { width: 60px; }
 
-/* Küçülünce Yazıları ve Başlıkları Gizle */
+/* Küçülünce Gizle */
 .sidebar.collapsed span,
 .sidebar.collapsed h2 span,
 .sidebar.collapsed p span {
@@ -148,17 +216,16 @@ html { scroll-behavior: smooth; }
     opacity: 0;
 }
 
-/* Küçülünce Başlık ve Alt Başlık Ayarı */
 .sidebar.collapsed h2, 
 .sidebar.collapsed p {
     text-align: center;
     margin: 0;
     padding: 5px 0;
 }
-/* Başlıklar (Logo ve Alt Yazı) */
+
 .sidebar h2 { 
-    text-align: left; /* Sola yasla */
-    padding-left: 20px; /* Menü linkleriyle aynı hizaya getir */
+    text-align: left; 
+    padding-left: 20px; 
     font-size: 1.5rem; 
     margin-bottom: 5px; 
     color: #fff; 
@@ -166,17 +233,41 @@ html { scroll-behavior: smooth; }
 }
 
 .sidebar p { 
-    text-align: left; /* Sola yasla */
-    padding-left: 20px; /* Hizala */
+    text-align: left; 
+    padding-left: 20px; 
     font-size: 0.9rem; 
     color: #adb5bd; 
     margin-bottom: 20px; 
     white-space: nowrap; 
 }
 
-/* Küçülünce (Collapsed) Tekrar Ortala */
 .sidebar.collapsed h2, 
 .sidebar.collapsed p {
-    text-align: center; /* Küçülünce ortada dursun */
-    padding-left: 0;    /* Boşluğu sıfırla */
+    text-align: center; 
+    padding-left: 0;
+}
+
+/* GRAFİK ALANI STİLLERİ */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.chart-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    height: 400px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-box canvas {
+    flex: 1;
+    max-height: 320px !important;
+    width: 100% !important;
 }

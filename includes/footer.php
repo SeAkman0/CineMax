@@ -21,8 +21,8 @@
 
                 <div class="footer-section">
                     <h4>İletişim</h4>
-                    <p><i class="fas fa-envelope"></i> info@cinemamax.com</p>
-                    <p><i class="fas fa-map-marker-alt"></i> İstanbul, Türkiye</p>
+                    <p><i class="fas fa-envelope"></i> cmax131415@gmail.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Manisa, Türkiye</p>
                 </div>
 
             </div>

@@ -37,7 +37,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         </a>
                     </li>
                     
+                    <li>
+                        <a href="halls.php" class="nav-link <?php echo ($current_page == 'halls.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-chair"></i> Salonlar
+                        </a>
+                    </li>
+                    
                     <?php if(isset($_SESSION['user_id'])): ?>
+                        
                         <li>
                             <a href="my-tickets.php" class="nav-link <?php echo ($current_page == 'my-tickets.php') ? 'active' : ''; ?>">
                                 <i class="fas fa-ticket-alt"></i> Biletlerim
@@ -47,6 +54,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <?php if($_SESSION['role'] == 'admin'): ?>
                             <li><a href="admin/dashboard.php" class="nav-link" style="color:#ff4757;"><i class="fas fa-user-shield"></i> Yönetim</a></li>
                         <?php endif; ?>
+
                     <?php endif; ?>
                 </ul>
                 
@@ -55,7 +63,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         
                         <div style="display:flex; align-items:center; color:white; font-size:0.95rem; margin-right:10px;">
                             <span style="margin-right:15px;">
-                                👋 Hoşgeldin, <strong style="color:#ffd700; border-bottom:1px dashed #ffd700;"><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
+                                <strong style="color:#ffd700; border-bottom:1px dashed #ffd700;"><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
                             </span>
                             
                             <a href="logout.php" class="btn-icon" title="Güvenli Çıkış">
