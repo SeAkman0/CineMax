@@ -135,8 +135,45 @@ function createSortLink($column, $label, $currentSort, $currentDir) {
                 <div style="display:flex; gap:15px;">
                     <div style="flex:1;">
                         <label style="display:block; margin-bottom:5px; font-weight:600;">Tarih ve Saat</label>
-                        <input type="datetime-local" name="start_time" required 
-                               style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                       <input 
+                        type="datetime-local" 
+                        id="dateInput" 
+                        name="start_time" 
+                        required 
+                        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;"
+                        >
+                        <p id="error-msg" style="color: red; display: none; font-size: 14px; margin-top: 5px; white-space: nowrap;">
+                        Geçmiş saat seçemezsiniz!
+                        </p>
+
+                        <script>
+                        const dateInput = document.getElementById("dateInput");
+                        const errorMsg = document.getElementById("error-msg");
+
+                        // Fonksiyon: Şu anki yerel tarihi formatlar (YYYY-MM-DDThh:mm)
+                        function getNowISO() {
+                            const now = new Date();
+                            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                            return now.toISOString().slice(0, 16);
+                        }
+
+                        // 1. Sayfa açıldığında 'min' değerini ayarla (Takvimde grileştirmek için)
+                        dateInput.min = getNowISO();
+
+                        // 2. Kullanıcı her seçim yaptığında kontrol et
+                        dateInput.addEventListener("input", function() {
+                            const selectedDate = new Date(this.value); // Seçilen tarih
+                            const now = new Date(); // Şu anki tarih
+
+                            // Eğer seçilen tarih şu andan küçükse
+                            if (selectedDate < now) {
+                            errorMsg.style.display = "block"; // Hata mesajını göster
+                            this.value = ""; // Seçimi sıfırla
+                            } else {
+                            errorMsg.style.display = "none"; // Hata yoksa mesajı gizle
+                            }
+                        });
+                        </script>
                     </div>
                     
                     <div style="flex:1;">
